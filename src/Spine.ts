@@ -507,6 +507,9 @@ namespace pixi_spine {
                 this.lastTime = 0;
             }
 
+            if(!this.skeleton)
+                return;
+
             PIXI.Container.prototype.updateTransform.call(this);
         };
 

@@ -159,7 +159,7 @@ namespace pixi_spine.core {
                 let animationLast = current.animationLast, animationTime = current.getAnimationTime();
                 let timelineCount = current.animation.timelines.length;
                 let timelines = current.animation.timelines;
-                if (i == 0 && (mix == 1 || blend == MixBlend.add)) {
+                if ((i == 0 && mix == 1) || blend == MixBlend.add) {
                     for (let ii = 0; ii < timelineCount; ii++)
                         timelines[ii].apply(skeleton, animationLast, animationTime, events, mix, blend, MixDirection.in);
                 } else {
@@ -528,7 +528,7 @@ namespace pixi_spine.core {
 
         expandToIndex (index: number) {
             if (index < this.tracks.length) return this.tracks[index];
-            Utils.ensureArrayCapacity(this.tracks, index - this.tracks.length + 1, null);
+            Utils.ensureArrayCapacity(this.tracks, index + 1, null);
             this.tracks.length = index + 1;
             return null;
         }
