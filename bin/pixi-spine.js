@@ -2196,7 +2196,7 @@ var pixi_spine;
             AtlasAttachmentLoader.prototype.newRegionAttachment = function (skin, name, path) {
                 var region = this.atlas.findRegion(path);
                 if (region == null)
-                    throw new Error("Region not found in atlas: " + path + " (region attachment: " + name + ")");
+                    return null;
                 var attachment = new core.RegionAttachment(name);
                 attachment.region = region;
                 return attachment;
@@ -2204,7 +2204,7 @@ var pixi_spine;
             AtlasAttachmentLoader.prototype.newMeshAttachment = function (skin, name, path) {
                 var region = this.atlas.findRegion(path);
                 if (region == null)
-                    throw new Error("Region not found in atlas: " + path + " (mesh attachment: " + name + ")");
+                    return null;
                 var attachment = new core.MeshAttachment(name);
                 attachment.region = region;
                 return attachment;

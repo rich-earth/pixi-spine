@@ -503,6 +503,8 @@ namespace pixi_spine {
                 let timeDelta = (Date.now() - this.lastTime) * 0.001;
                 this.lastTime = Date.now();
                 this.update(timeDelta);
+                if(!this.skeleton)
+                    return;
             } else {
                 this.lastTime = 0;
             }

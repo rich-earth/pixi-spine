@@ -40,7 +40,7 @@ namespace pixi_spine.core {
         /** @return May be null to not load an attachment. */
         newRegionAttachment(skin: Skin, name: string, path: string): RegionAttachment {
             let region = this.atlas.findRegion(path);
-            if (region == null) throw new Error("Region not found in atlas: " + path + " (region attachment: " + name + ")");
+            // if (region == null) return null;// throw new Error("Region not found in atlas: " + path + " (region attachment: " + name + ")");
             let attachment = new RegionAttachment(name);
             attachment.region = region;
             return attachment;
@@ -49,7 +49,7 @@ namespace pixi_spine.core {
         /** @return May be null to not load an attachment. */
         newMeshAttachment(skin: Skin, name: string, path: string): MeshAttachment {
             let region = this.atlas.findRegion(path);
-            if (region == null) throw new Error("Region not found in atlas: " + path + " (mesh attachment: " + name + ")");
+            // if (region == null) return null;//throw new Error("Region not found in atlas: " + path + " (mesh attachment: " + name + ")");
             let attachment = new MeshAttachment(name);
             attachment.region = region;
             return attachment;
