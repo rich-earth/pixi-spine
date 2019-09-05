@@ -202,6 +202,18 @@ namespace pixi_spine.core {
 
             // Skins.
             if (root.skins) {
+
+                // Change skin format if 3.8 version
+                if(root.skins instanceof Array)
+                {
+                    let newSkins:object = {};
+                    for (let i=0; i< root.skins.length; i++)
+                    {
+                        newSkins[root.skins[i].name] = root.skins[i].attachments;
+                    }
+                    root.skins = newSkins;
+                }
+
                 for (let skinName in root.skins) {
                     let skinMap = root.skins[skinName]
                     let skin = new Skin(skinName);
@@ -419,7 +431,7 @@ namespace pixi_spine.core {
                             let frameIndex = 0;
                             for (let i = 0; i < timelineMap.length; i++) {
                                 let valueMap = timelineMap[i];
-                                timeline.setFrame(frameIndex++, valueMap.time, valueMap.name);
+                                timeline.setFrame(frameIndex++, this.getValue(valueMap, "time", 0), valueMap.name);
                             }
                             timelines.push(timeline);
                             duration = Math.max(duration, timeline.frames[timeline.getFrameCount() - 1]);
@@ -432,7 +444,7 @@ namespace pixi_spine.core {
                                 let valueMap = timelineMap[i];
                                 let color = new Color();
                                 color.setFromString(valueMap.color || "ffffffff");
-                                timeline.setFrame(frameIndex, valueMap.time, color.r, color.g, color.b, color.a);
+                                timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), color.r, color.g, color.b, color.a);
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
                             }
@@ -450,7 +462,7 @@ namespace pixi_spine.core {
                                 let dark = new Color();
                                 light.setFromString(valueMap.light);
                                 dark.setFromString(valueMap.dark);
-                                timeline.setFrame(frameIndex, valueMap.time, light.r, light.g, light.b, light.a, dark.r, dark.g, dark.b);
+                                timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), light.r, light.g, light.b, light.a, dark.r, dark.g, dark.b);
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
                             }
@@ -478,7 +490,7 @@ namespace pixi_spine.core {
                             let frameIndex = 0;
                             for (let i = 0; i < timelineMap.length; i++) {
                                 let valueMap = timelineMap[i];
-                                timeline.setFrame(frameIndex, valueMap.time, valueMap.angle);
+                                timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, "angle", 0));
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
                             }
@@ -501,8 +513,11 @@ namespace pixi_spine.core {
                             let frameIndex = 0;
                             for (let i = 0; i < timelineMap.length; i++) {
                                 let valueMap = timelineMap[i];
-                                let x = this.getValue(valueMap, "x", 0), y = this.getValue(valueMap, "y", 0);
-                                timeline.setFrame(frameIndex, valueMap.time, x * timelineScale, y * timelineScale);
+
+                                let x = this.getValue(valueMap, "x", timelineName === "scale"? 1 : 0);
+                                let y = this.getValue(valueMap, "y", timelineName === "scale"? 1 : 0);
+
+                                timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), x * timelineScale, y * timelineScale);
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
                             }
@@ -525,7 +540,7 @@ namespace pixi_spine.core {
                     let frameIndex = 0;
                     for (let i = 0; i < constraintMap.length; i++) {
                         let valueMap = constraintMap[i];
-                        timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "mix", 1),
+                        timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, "mix", 1),
                             this.getValue(valueMap, "bendPositive", true) ? 1 : -1, this.getValue(valueMap, "compress", false), this.getValue(valueMap, "stretch", false));
                         this.readCurve(valueMap, timeline, frameIndex);
                         frameIndex++;
@@ -545,7 +560,7 @@ namespace pixi_spine.core {
                     let frameIndex = 0;
                     for (let i = 0; i < constraintMap.length; i++) {
                         let valueMap = constraintMap[i];
-                        timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "rotateMix", 1),
+                        timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, "rotateMix", 1),
                             this.getValue(valueMap, "translateMix", 1), this.getValue(valueMap, "scaleMix", 1), this.getValue(valueMap, "shearMix", 1));
                         this.readCurve(valueMap, timeline, frameIndex);
                         frameIndex++;
@@ -579,7 +594,7 @@ namespace pixi_spine.core {
                             let frameIndex = 0;
                             for (let i = 0; i < timelineMap.length; i++) {
                                 let valueMap = timelineMap[i];
-                                timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, timelineName, 0) * timelineScale);
+                                timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, timelineName, 0) * timelineScale);
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
                             }
@@ -592,7 +607,7 @@ namespace pixi_spine.core {
                             let frameIndex = 0;
                             for (let i = 0; i < timelineMap.length; i++) {
                                 let valueMap = timelineMap[i];
-                                timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "rotateMix", 1),
+                                timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, "rotateMix", 1),
                                     this.getValue(valueMap, "translateMix", 1));
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
@@ -648,7 +663,7 @@ namespace pixi_spine.core {
                                     }
                                 }
 
-                                timeline.setFrame(frameIndex, valueMap.time, deform);
+                                timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), deform);
                                 this.readCurve(valueMap, timeline, frameIndex);
                                 frameIndex++;
                             }
@@ -691,7 +706,7 @@ namespace pixi_spine.core {
                         for (let i = slotCount - 1; i >= 0; i--)
                             if (drawOrder[i] == -1) drawOrder[i] = unchanged[--unchangedIndex];
                     }
-                    timeline.setFrame(frameIndex++, drawOrderMap.time, drawOrder);
+                    timeline.setFrame(frameIndex++, drawOrderMap.time || 0, drawOrder);
                 }
                 timelines.push(timeline);
                 duration = Math.max(duration, timeline.frames[timeline.getFrameCount() - 1]);
@@ -705,7 +720,7 @@ namespace pixi_spine.core {
                     let eventMap = map.events[i];
                     let eventData = skeletonData.findEvent(eventMap.name);
                     if (eventData == null) throw new Error("Event not found: " + eventMap.name);
-                    let event = new Event(Utils.toSinglePrecision(eventMap.time), eventData);
+                    let event = new Event(Utils.toSinglePrecision(eventMap.time || 0), eventData);
                     event.intValue = this.getValue(eventMap, "int", eventData.intValue);
                     event.floatValue = this.getValue(eventMap, "float", eventData.floatValue);
                     event.stringValue = this.getValue(eventMap, "string", eventData.stringValue);
@@ -727,12 +742,15 @@ namespace pixi_spine.core {
         }
 
         readCurve (map: any, timeline: CurveTimeline, frameIndex: number) {
-            if (!map.curve) return;
+            if (isNaN(map.curve)) return;
             if (map.curve === "stepped")
                 timeline.setStepped(frameIndex);
-            else if (Object.prototype.toString.call(map.curve) === '[object Array]') {
+            else if (map.curve instanceof Array) {
                 let curve: Array<number> = map.curve;
                 timeline.setCurve(frameIndex, curve[0], curve[1], curve[2], curve[3]);
+            }else{
+                // Spine 3.8 not array { "curve": 0.53, "c2": 0.01, "c3": 0.537, "c4": 0.97 },
+                timeline.setCurve(frameIndex, map.curve || 0, map.c2 || 0, map.c3 || 1, map.c4 || 0);
             }
         }
 
