@@ -2195,16 +2195,12 @@ var pixi_spine;
             }
             AtlasAttachmentLoader.prototype.newRegionAttachment = function (skin, name, path) {
                 var region = this.atlas.findRegion(path);
-                if (region == null)
-                    throw new Error("Region not found in atlas: " + path + " (region attachment: " + name + ")");
                 var attachment = new core.RegionAttachment(name);
                 attachment.region = region;
                 return attachment;
             };
             AtlasAttachmentLoader.prototype.newMeshAttachment = function (skin, name, path) {
                 var region = this.atlas.findRegion(path);
-                if (region == null)
-                    throw new Error("Region not found in atlas: " + path + " (mesh attachment: " + name + ")");
                 var attachment = new core.MeshAttachment(name);
                 attachment.region = region;
                 return attachment;
@@ -4423,6 +4419,13 @@ var pixi_spine;
                     }
                 }
                 if (root.skins) {
+                    if (root.skins instanceof Array) {
+                        var newSkins = {};
+                        for (var i = 0; i < root.skins.length; i++) {
+                            newSkins[root.skins[i].name] = root.skins[i].attachments;
+                        }
+                        root.skins = newSkins;
+                    }
                     for (var skinName in root.skins) {
                         var skinMap = root.skins[skinName];
                         var skin = new core.Skin(skinName);
@@ -4628,7 +4631,7 @@ var pixi_spine;
                                 var frameIndex = 0;
                                 for (var i = 0; i < timelineMap.length; i++) {
                                     var valueMap = timelineMap[i];
-                                    timeline.setFrame(frameIndex++, valueMap.time, valueMap.name);
+                                    timeline.setFrame(frameIndex++, this.getValue(valueMap, "time", 0), valueMap.name);
                                 }
                                 timelines.push(timeline);
                                 duration = Math.max(duration, timeline.frames[timeline.getFrameCount() - 1]);
@@ -4641,7 +4644,7 @@ var pixi_spine;
                                     var valueMap = timelineMap[i];
                                     var color = new core.Color();
                                     color.setFromString(valueMap.color || "ffffffff");
-                                    timeline.setFrame(frameIndex, valueMap.time, color.r, color.g, color.b, color.a);
+                                    timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), color.r, color.g, color.b, color.a);
                                     this.readCurve(valueMap, timeline, frameIndex);
                                     frameIndex++;
                                 }
@@ -4658,7 +4661,7 @@ var pixi_spine;
                                     var dark = new core.Color();
                                     light.setFromString(valueMap.light);
                                     dark.setFromString(valueMap.dark);
-                                    timeline.setFrame(frameIndex, valueMap.time, light.r, light.g, light.b, light.a, dark.r, dark.g, dark.b);
+                                    timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), light.r, light.g, light.b, light.a, dark.r, dark.g, dark.b);
                                     this.readCurve(valueMap, timeline, frameIndex);
                                     frameIndex++;
                                 }
@@ -4684,7 +4687,7 @@ var pixi_spine;
                                 var frameIndex = 0;
                                 for (var i = 0; i < timelineMap.length; i++) {
                                     var valueMap = timelineMap[i];
-                                    timeline.setFrame(frameIndex, valueMap.time, valueMap.angle);
+                                    timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, "angle", 0));
                                     this.readCurve(valueMap, timeline, frameIndex);
                                     frameIndex++;
                                 }
@@ -4706,8 +4709,9 @@ var pixi_spine;
                                 var frameIndex = 0;
                                 for (var i = 0; i < timelineMap.length; i++) {
                                     var valueMap = timelineMap[i];
-                                    var x = this.getValue(valueMap, "x", 0), y = this.getValue(valueMap, "y", 0);
-                                    timeline.setFrame(frameIndex, valueMap.time, x * timelineScale, y * timelineScale);
+                                    var x = this.getValue(valueMap, "x", timelineName === "scale" ? 1 : 0);
+                                    var y = this.getValue(valueMap, "y", timelineName === "scale" ? 1 : 0);
+                                    timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), x * timelineScale, y * timelineScale);
                                     this.readCurve(valueMap, timeline, frameIndex);
                                     frameIndex++;
                                 }
@@ -4728,7 +4732,7 @@ var pixi_spine;
                         var frameIndex = 0;
                         for (var i = 0; i < constraintMap.length; i++) {
                             var valueMap = constraintMap[i];
-                            timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "mix", 1), this.getValue(valueMap, "bendPositive", true) ? 1 : -1, this.getValue(valueMap, "compress", false), this.getValue(valueMap, "stretch", false));
+                            timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, "mix", 1), this.getValue(valueMap, "bendPositive", true) ? 1 : -1, this.getValue(valueMap, "compress", false), this.getValue(valueMap, "stretch", false));
                             this.readCurve(valueMap, timeline, frameIndex);
                             frameIndex++;
                         }
@@ -4745,7 +4749,7 @@ var pixi_spine;
                         var frameIndex = 0;
                         for (var i = 0; i < constraintMap.length; i++) {
                             var valueMap = constraintMap[i];
-                            timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "rotateMix", 1), this.getValue(valueMap, "translateMix", 1), this.getValue(valueMap, "scaleMix", 1), this.getValue(valueMap, "shearMix", 1));
+                            timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, "rotateMix", 1), this.getValue(valueMap, "translateMix", 1), this.getValue(valueMap, "scaleMix", 1), this.getValue(valueMap, "shearMix", 1));
                             this.readCurve(valueMap, timeline, frameIndex);
                             frameIndex++;
                         }
@@ -4779,7 +4783,7 @@ var pixi_spine;
                                 var frameIndex = 0;
                                 for (var i = 0; i < timelineMap.length; i++) {
                                     var valueMap = timelineMap[i];
-                                    timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, timelineName, 0) * timelineScale);
+                                    timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, timelineName, 0) * timelineScale);
                                     this.readCurve(valueMap, timeline, frameIndex);
                                     frameIndex++;
                                 }
@@ -4792,7 +4796,7 @@ var pixi_spine;
                                 var frameIndex = 0;
                                 for (var i = 0; i < timelineMap.length; i++) {
                                     var valueMap = timelineMap[i];
-                                    timeline.setFrame(frameIndex, valueMap.time, this.getValue(valueMap, "rotateMix", 1), this.getValue(valueMap, "translateMix", 1));
+                                    timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), this.getValue(valueMap, "rotateMix", 1), this.getValue(valueMap, "translateMix", 1));
                                     this.readCurve(valueMap, timeline, frameIndex);
                                     frameIndex++;
                                 }
@@ -4844,7 +4848,7 @@ var pixi_spine;
                                                 deform[i] += vertices[i];
                                         }
                                     }
-                                    timeline.setFrame(frameIndex, valueMap.time, deform);
+                                    timeline.setFrame(frameIndex, this.getValue(valueMap, "time", 0), deform);
                                     this.readCurve(valueMap, timeline, frameIndex);
                                     frameIndex++;
                                 }
@@ -4884,7 +4888,7 @@ var pixi_spine;
                                 if (drawOrder[i] == -1)
                                     drawOrder[i] = unchanged[--unchangedIndex];
                         }
-                        timeline.setFrame(frameIndex++, drawOrderMap.time, drawOrder);
+                        timeline.setFrame(frameIndex++, drawOrderMap.time || 0, drawOrder);
                     }
                     timelines.push(timeline);
                     duration = Math.max(duration, timeline.frames[timeline.getFrameCount() - 1]);
@@ -4897,7 +4901,7 @@ var pixi_spine;
                         var eventData = skeletonData.findEvent(eventMap.name);
                         if (eventData == null)
                             throw new Error("Event not found: " + eventMap.name);
-                        var event_5 = new core.Event(core.Utils.toSinglePrecision(eventMap.time), eventData);
+                        var event_5 = new core.Event(core.Utils.toSinglePrecision(eventMap.time || 0), eventData);
                         event_5.intValue = this.getValue(eventMap, "int", eventData.intValue);
                         event_5.floatValue = this.getValue(eventMap, "float", eventData.floatValue);
                         event_5.stringValue = this.getValue(eventMap, "string", eventData.stringValue);
@@ -4916,13 +4920,16 @@ var pixi_spine;
                 skeletonData.animations.push(new core.Animation(name, timelines, duration));
             };
             SkeletonJson.prototype.readCurve = function (map, timeline, frameIndex) {
-                if (!map.curve)
+                if (isNaN(map.curve))
                     return;
                 if (map.curve === "stepped")
                     timeline.setStepped(frameIndex);
-                else if (Object.prototype.toString.call(map.curve) === '[object Array]') {
+                else if (map.curve instanceof Array) {
                     var curve = map.curve;
                     timeline.setCurve(frameIndex, curve[0], curve[1], curve[2], curve[3]);
+                }
+                else {
+                    timeline.setCurve(frameIndex, map.curve || 0, map.c2 || 0, map.c3 || 1, map.c4 || 0);
                 }
             };
             SkeletonJson.prototype.getValue = function (map, prop, defaultValue) {
@@ -7233,6 +7240,8 @@ var pixi_spine;
                 var timeDelta = (Date.now() - this.lastTime) * 0.001;
                 this.lastTime = Date.now();
                 this.update(timeDelta);
+                if (!this.skeleton)
+                    return;
             }
             else {
                 this.lastTime = 0;
