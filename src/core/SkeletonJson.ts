@@ -742,7 +742,7 @@ namespace pixi_spine.core {
         }
 
         readCurve (map: any, timeline: CurveTimeline, frameIndex: number) {
-            if (isNaN(map.curve)) return;
+            if (!map.curve) return;
             if (map.curve === "stepped")
                 timeline.setStepped(frameIndex);
             else if (map.curve instanceof Array) {
