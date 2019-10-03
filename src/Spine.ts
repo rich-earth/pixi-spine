@@ -104,6 +104,11 @@ namespace pixi_spine {
                 this.tempClipContainers.push(null);
 
                 if (attachment instanceof core.RegionAttachment) {
+
+                    if(!attachment.region){
+                        throw new Error("Region / Slot error.  Check that attachment for '" + slot.data.name + "' is in the Texture Cache");
+                    }
+
                     let spriteName = (attachment.region as core.TextureAtlasRegion).name;
                     let sprite = this.createSprite(slot, attachment, spriteName);
                     slot.currentSprite = sprite;
