@@ -2263,16 +2263,12 @@ var pixi_spine;
             }
             AtlasAttachmentLoader.prototype.newRegionAttachment = function (skin, name, path) {
                 var region = this.atlas.findRegion(path);
-                if (region == null)
-                    throw new Error("Region not found in atlas: " + path + " (region attachment: " + name + ")");
                 var attachment = new core.RegionAttachment(name);
                 attachment.region = region;
                 return attachment;
             };
             AtlasAttachmentLoader.prototype.newMeshAttachment = function (skin, name, path) {
                 var region = this.atlas.findRegion(path);
-                if (region == null)
-                    throw new Error("Region not found in atlas: " + path + " (mesh attachment: " + name + ")");
                 var attachment = new core.MeshAttachment(name);
                 attachment.region = region;
                 return attachment;
@@ -5913,7 +5909,7 @@ var pixi_spine;
                 skeletonData.animations.push(new core.Animation(name, timelines, duration));
             };
             SkeletonJson.prototype.readCurve = function (map, timeline, frameIndex) {
-                if (!map.curve)
+                if (map.curve === undefined)
                     return;
                 if (map.curve === "stepped")
                     timeline.setStepped(frameIndex);
@@ -8166,6 +8162,9 @@ var pixi_spine;
                 _this.addChild(slotContainer);
                 _this.tempClipContainers.push(null);
                 if (attachment instanceof pixi_spine.core.RegionAttachment) {
+                    if (!attachment.region) {
+                        throw new Error("Region / Slot error.  Check that attachment for '" + slot.data.name + "' is in the Texture Cache");
+                    }
                     var spriteName = attachment.region.name;
                     var sprite = _this.createSprite(slot, attachment, spriteName);
                     slot.currentSprite = sprite;
